@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Puffo Creation Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="creator" aria-label="Create Puffo from photos">
+        <div class="creator-copy">
+          <p class="product-name">Pet's Afterlife</p>
+          <h1>Create a living version of Puffo from his photo.</h1>
+          <p>
+            The first demo should prove one thing: a real photo can become a
+            recognizable, lovingly stylized pet who keeps his own rhythm.
+          </p>
+        </div>
+
+        <section class="flow-rail" aria-label="Prototype flow">
+          <article class="flow-step is-active" data-step="photo">
+            <span>01</span>
+            <div>
+              <strong>Photo</strong>
+              <p>Puffo.JPG, then more angles.</p>
+            </div>
+          </article>
+          <article class="flow-step" data-step="dna">
+            <span>02</span>
+            <div>
+              <strong>Visual DNA</strong>
+              <p>Confirm what makes him Puffo.</p>
+            </div>
+          </article>
+          <article class="flow-step" data-step="preview">
+            <span>03</span>
+            <div>
+              <strong>Animated Preview</strong>
+              <p>Review motion before Home.</p>
+            </div>
+          </article>
+        </section>
+
+        <form class="creation-form" id="petForm">
+          <section class="photo-section" aria-label="Photo reference">
+            <div class="photo-frame" id="photoPreview">
+              <span>Loading Puffo.JPG</span>
+            </div>
+
+            <div class="photo-actions">
+              <label class="file-button">
+                <input id="petPhoto" type="file" accept="image/*" multiple />
+                Add photos
+              </label>
+              <p id="visualSummary">
+                Use 3-5 photos for stronger likeness: face, side body, favorite
+                pose, and any special markings.
+              </p>
+            </div>
+          </section>
+
+          <section class="dna-section" aria-label="Puffo visual DNA">
+            <div class="section-heading">
+              <span>Visual DNA</span>
+              <strong id="dnaSummary">1 photo found: good start</strong>
+            </div>
+
+            <div class="trait-list" id="traitList">
+              <span>white fluffy coat</span>
+              <span>cream floppy ears</span>
+              <span>large dark button eyes</span>
+              <span>round black nose</span>
+              <span>soft white muzzle</span>
+              <span>tiny compact body</span>
+            </div>
+
+            <div class="swatches" id="colorSwatches" aria-label="Extracted palette"></div>
+          </section>
+
+          <section class="inputs-section" aria-label="Owner corrections">
+            <label>
+              <span>Name</span>
+              <input id="petName" value="Puffo" />
+            </label>
+            <label>
+              <span>Breed / body</span>
+              <input id="breedInput" value="Tiny Cavachon, small toy size" />
+            </label>
+            <label>
+              <span>Weight / age notes</span>
+              <input id="weightInput" value="Small and soft; exact weight to confirm" />
+            </label>
+            <label>
+              <span>Owner tweak prompt</span>
+              <textarea id="tweakPrompt">Keep Puffo's white fluffy coat, cream floppy ears, dark button eyes, round black nose, soft white muzzle, tiny paws, compact body, and slightly skeptical birthday expression. Make him cute and polished, not photorealistic and not generic.</textarea>
+            </label>
+          </section>
+
+          <button class="generate-button" id="generateButton" type="button">
+            Generate Puffo Preview
+          </button>
+        </form>
+
+        <section class="prompt-card" aria-label="Generation direction">
+          <div>
+            <strong id="matchEstimate">Likeness target: recognizable and lovingly stylized</strong>
+            <p id="matchHint">
+              Owner-confirmed DNA is the source of truth before generating more frames.
+            </p>
+          </div>
+          <details>
+            <summary>Prompt contract</summary>
+            <pre id="promptOutput"></pre>
+          </details>
+        </section>
+      </section>
+
+      <section class="phone-wrap" aria-label="Puffo home preview">
+        <div class="phone">
+          <header class="phone-bar">
+            <span>9:41</span>
+            <strong id="homeTitle">Puffo's Home</strong>
+            <span class="battery" aria-hidden="true"></span>
+          </header>
+
+          <section class="home-scene" aria-label="Interactive home">
+            <div class="window" aria-hidden="true"></div>
+            <div class="memory-token" aria-hidden="true">
+              <span>birthday cake memory</span>
+            </div>
+            <div class="sun-patch" aria-hidden="true"></div>
+            <div class="soft-bed" aria-hidden="true"></div>
+            <div class="toy" aria-hidden="true"></div>
+
+            <p class="bubble" id="petBubble">I smelled cake. Is it for me?</p>
+            <span
+              class="puffo-sprite pet-avatar live-sprite"
+              id="petAvatar"
+              data-state="idle"
+              aria-label="Animated Puffo"
+            ></span>
+          </section>
+
+          <section class="home-status" aria-label="Pet status">
+            <div>
+              <span>Mood</span>
+              <strong id="petState">Awake</strong>
+            </div>
+            <div>
+              <span>Sleep</span>
+              <strong id="sleepNeed">8.0 / 12h</strong>
+            </div>
+            <div>
+              <span>Boundary</span>
+              <strong id="patienceLevel">Open</strong>
+            </div>
+          </section>
+
+          <nav class="actions" aria-label="Interactions">
+            <button type="button" data-action="call">Call</button>
+            <button type="button" data-action="play">Play</button>
+            <button type="button" data-action="sleep">Nap</button>
+            <button type="button" data-action="pet">Pet</button>
+          </nav>
+        </div>
+
+        <section class="state-panel" aria-label="Animation states">
+          <div class="section-heading">
+            <span>Animated Preview</span>
+            <strong id="previewStateLabel">Idle - 6 frames</strong>
+          </div>
+
+          <div class="state-tabs">
+            <button class="state-tab is-selected" type="button" data-state-choice="idle">
+              Idle
+            </button>
+            <button class="state-tab" type="button" data-state-choice="running-right">
+              Walk
+            </button>
+            <button class="state-tab" type="button" data-state-choice="waiting">
+              Sleep
+            </button>
+            <button class="state-tab" type="button" data-state-choice="failed">
+              Annoyed
+            </button>
+          </div>
+
+          <div class="frame-strip" id="previewFrameStrip" aria-label="Current state frames"></div>
+          <p id="selectedStatePrompt">
+            Neutral breathing loop with small visible frame differences.
+          </p>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
