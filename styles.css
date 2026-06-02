@@ -543,7 +543,7 @@ pre {
   display: block;
   width: 192px;
   height: 208px;
-  background-image: url("./pets/puffo-v2-compact/spritesheet.webp");
+  background-image: url("./spritesheet.webp");
   background-repeat: no-repeat;
   background-size: 800% 900%;
   image-rendering: auto;
