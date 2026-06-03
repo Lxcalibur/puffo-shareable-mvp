@@ -11,26 +11,35 @@
       <section class="creator" aria-label="Create Puffo from photos">
         <div class="creator-copy">
           <p class="product-name">Pet's Afterlife</p>
-          <h1>Create a living version of Puffo from his photo.</h1>
+          <h1>Create a living version of a pet from photos.</h1>
           <p>
             The first demo should prove one thing: a real photo can become a
             recognizable, lovingly stylized pet who keeps his own rhythm.
           </p>
         </div>
 
+        <section class="pet-switcher" aria-label="Choose prototype pet">
+          <button class="pet-switch is-selected" type="button" data-pet-switch="dog">
+            Puffo
+          </button>
+          <button class="pet-switch" type="button" data-pet-switch="cat">
+            Nutty
+          </button>
+        </section>
+
         <section class="flow-rail" aria-label="Prototype flow">
           <article class="flow-step is-active" data-step="photo">
             <span>01</span>
             <div>
               <strong>Photo</strong>
-              <p>Puffo.JPG, then more angles.</p>
+              <p>Reference photos, then more angles.</p>
             </div>
           </article>
           <article class="flow-step" data-step="dna">
             <span>02</span>
             <div>
               <strong>Visual DNA</strong>
-              <p>Confirm what makes him Puffo.</p>
+              <p>Confirm markings, shape, and expression.</p>
             </div>
           </article>
           <article class="flow-step" data-step="preview">
@@ -126,14 +135,11 @@
 
           <section class="home-scene" aria-label="Interactive home">
             <div class="window" aria-hidden="true"></div>
-            <div class="memory-token" aria-hidden="true">
-              <span>birthday cake memory</span>
-            </div>
+            <div class="memory-token" aria-hidden="true"></div>
             <div class="sun-patch" aria-hidden="true"></div>
             <div class="soft-bed" aria-hidden="true"></div>
             <div class="toy" aria-hidden="true"></div>
 
-            <p class="bubble" id="petBubble">I smelled cake. Is it for me?</p>
             <span
               class="puffo-sprite pet-avatar live-sprite"
               id="petAvatar"
@@ -143,6 +149,7 @@
           </section>
 
           <section class="home-status" aria-label="Pet status">
+            <p class="bubble" id="petBubble">I smelled cake. Is it for me?</p>
             <div>
               <span>Mood</span>
               <strong id="petState">Awake</strong>
@@ -194,6 +201,6 @@
       </section>
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./app.js?v=nutty-v2-markings"></script>
   </body>
 </html>

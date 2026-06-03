@@ -21,7 +21,8 @@ const elements = {
   patienceLevel: document.querySelector("#patienceLevel"),
   previewStateLabel: document.querySelector("#previewStateLabel"),
   previewFrameStrip: document.querySelector("#previewFrameStrip"),
-  selectedStatePrompt: document.querySelector("#selectedStatePrompt")
+  selectedStatePrompt: document.querySelector("#selectedStatePrompt"),
+  petSwitches: document.querySelectorAll("[data-pet-switch]")
 };
 
 const petStates = {
@@ -67,19 +68,108 @@ const petStates = {
   }
 };
 
-const defaultTraits = [
-  "white fluffy coat",
-  "cream floppy ears",
-  "large dark button eyes",
-  "round black nose",
-  "soft white muzzle",
-  "tiny compact body",
-  "slightly skeptical birthday face"
-];
+const petProfiles = {
+  dog: {
+    name: "Puffo",
+    switchLabel: "Puffo",
+    species: "dog",
+    avatar: "sprite",
+    photoPaths: ["./Puffo.JPG"],
+    photoNames: ["Puffo.JPG"],
+    photoAlt: "Puffo reference photo",
+    palette: ["#fbf8ed", "#f3ead9", "#d8bd91", "#26251f"],
+    breed: "Tiny Cavachon, small toy size",
+    weight: "Small and soft; exact weight to confirm",
+    tweak:
+      "Keep Puffo's white fluffy coat, cream floppy ears, dark button eyes, round black nose, soft white muzzle, tiny paws, compact body, and slightly skeptical birthday expression. Make him cute and polished, not photorealistic and not generic.",
+    traits: [
+      "white fluffy coat",
+      "cream floppy ears",
+      "large dark button eyes",
+      "round black nose",
+      "soft white muzzle",
+      "tiny compact body",
+      "slightly skeptical birthday face"
+    ],
+    visualSummary:
+      "Use 3-5 photos for stronger likeness: face, side body, favorite pose, and any special markings.",
+    identityRule:
+      "white fluffy coat, cream floppy ears, dark button eyes, round black nose, soft muzzle, tiny paws, compact body",
+    statePrompts: {
+      idle: "Subtle breathing, tiny blink, cream ears resting, same Puffo face.",
+      "running-right": "Tiny quick walk with floppy cream ears and compact white body preserved.",
+      waiting: "Quiet low-energy loop used as Puffo's nap state for this MVP.",
+      failed: "Soft side-eye and tiny disappointment, never aggressive or distressed.",
+      review: "Head tilt review pose while the owner checks whether this feels like Puffo."
+    },
+    messages: {
+      initial: "I smelled cake. Is it for me?",
+      idle: "I'll stay nearby.",
+      generate: "Look closely. Does this still feel like Puffo?",
+      sleepClock: "My clock says I need more sleep today.",
+      call: "Puffo trots over, then decides how close is close enough.",
+      play: "Short play session. No endless fetching today.",
+      sleep: "I'll nap now. Wake me gently later.",
+      pet: "That spot is okay.",
+      petCareful: "Behind the ears is okay. Not forever.",
+      annoyed: "Puffo gives a tiny side-eye: a quiet minute, please."
+    }
+  },
+  cat: {
+    name: "Nutty",
+    switchLabel: "Nutty",
+    species: "cat",
+    avatar: "sprite",
+    spritePath: "./pets/nutty-v2-full-hatch/spritesheet.webp?v=nutty-v2-markings",
+    photoPaths: ["./cat-photo-1.jpg", "./cat-photo-2.jpg"],
+    photoNames: ["cat-photo-1.jpg", "cat-photo-2.jpg"],
+    photoAlt: "Gray and white cat reference photos",
+    palette: ["#2f3b43", "#687780", "#bf8f5d", "#f1eee5", "#a8b077"],
+    breed: "Gray domestic shorthair, window-hammock cat",
+    weight: "Medium build; exact weight to confirm",
+    tweak:
+      "Preserve Nutty's blue-gray short coat, white chest bib, white chin stripe, pale green eyes, upright ears, long white whiskers, warm brown patch above the right eye, brown mottled body patches, and calm window-watching personality. Make Nutty cute and polished, not photorealistic and not generic.",
+    traits: [
+      "blue-gray short coat",
+      "white chest bib",
+      "white chin stripe",
+      "warm brown patch above right eye",
+      "brown mottled body patches",
+      "pale green eyes",
+      "upright ears",
+      "long white whiskers"
+    ],
+    visualSummary:
+      "Two Nutty references loaded: one close face angle and one hammock body angle. The right-eye brown patch and body mottling are locked visual DNA.",
+    identityRule:
+      "blue-gray coat, white chest and chin stripe, pale green eyes, warm brown patch above the right eye, brown mottling on body and tail, upright ears, long white whiskers, compact curled body",
+    statePrompts: {
+      idle: "Slow blink, tiny ear twitch, green eyes alert, right-eye brown patch and mottled body preserved.",
+      "running-right": "Side-view cat walk with four paws alternating, tail balancing, gray coat, white chest, and brown body mottling preserved.",
+      waiting: "Curled window nap with closed eyes, tail wrapped around body, soft breathing, mottled coat preserved.",
+      failed: "Flattened ears, narrowed green eyes, tail flicking, and warm brown markings intact; annoyed but not distressed.",
+      review: "Head tilt and focused green-eyed look while owner checks right-eye patch, white bib, and body mottling."
+    },
+    messages: {
+      initial: "I saw something move outside.",
+      idle: "I'll watch from the window.",
+      generate: "Check the green eyes, white bib, right-eye brown patch, and body mottling.",
+      sleepClock: "My cat clock says it is nap time.",
+      call: "Nutty looks over, then takes the scenic route.",
+      play: "One quick pounce. Then window patrol.",
+      sleep: "Window nap scheduled. Do not disturb.",
+      pet: "Chin scratches are under review.",
+      petCareful: "Two more scratches. Maybe.",
+      annoyed: "Nutty flicks one ear: too much attention."
+    }
+  }
+};
 
-let uploadedPhotoNames = ["Puffo.JPG"];
-let palette = ["#fbf8ed", "#f3ead9", "#d8bd91", "#26251f"];
-let traits = [...defaultTraits];
+let activePetId = "dog";
+let activePet = petProfiles[activePetId];
+let uploadedPhotoNames = [...activePet.photoNames];
+let palette = [...activePet.palette];
+let traits = [...activePet.traits];
 let currentState = "idle";
 let sleepHours = 8;
 let interactionCount = 0;
@@ -110,6 +200,25 @@ function rgbFromHex(hex) {
   ];
 }
 
+function ensureCatMarkup(target) {
+  if (target.querySelector(".cat-body")) return;
+
+  target.replaceChildren(
+    Object.assign(document.createElement("span"), { className: "cat-tail" }),
+    Object.assign(document.createElement("span"), { className: "cat-body" }),
+    Object.assign(document.createElement("span"), { className: "cat-chest" }),
+    Object.assign(document.createElement("span"), { className: "cat-head" }),
+    Object.assign(document.createElement("span"), { className: "cat-ear cat-ear-left" }),
+    Object.assign(document.createElement("span"), { className: "cat-ear cat-ear-right" }),
+    Object.assign(document.createElement("span"), { className: "cat-eye cat-eye-left" }),
+    Object.assign(document.createElement("span"), { className: "cat-eye cat-eye-right" }),
+    Object.assign(document.createElement("span"), { className: "cat-nose" }),
+    Object.assign(document.createElement("span"), { className: "cat-chin" }),
+    Object.assign(document.createElement("span"), { className: "cat-whisker cat-whisker-left" }),
+    Object.assign(document.createElement("span"), { className: "cat-whisker cat-whisker-right" })
+  );
+}
+
 function renderSprite(target, stateId = "idle", frame = 0) {
   if (!target) return;
   const state = petStates[stateId] || petStates.idle;
@@ -117,6 +226,18 @@ function renderSprite(target, stateId = "idle", frame = 0) {
 
   target.dataset.state = stateId;
   target.dataset.frame = String(frameIndex);
+
+  if (activePet.avatar === "css-cat") {
+    target.classList.remove("puffo-sprite");
+    target.classList.add("cat-avatar");
+    target.style.backgroundPosition = "";
+    ensureCatMarkup(target);
+    return;
+  }
+
+  target.classList.add("puffo-sprite");
+  target.classList.remove("cat-avatar");
+  target.replaceChildren();
   target.style.backgroundPosition = `${frameIndex * (100 / 7)}% ${state.row * (100 / 8)}%`;
 }
 
@@ -127,7 +248,7 @@ function renderFrameStrip(stateId) {
     frame.className = "frame-cell";
 
     const sprite = document.createElement("span");
-    sprite.className = "puffo-sprite";
+    sprite.className = activePet.avatar === "css-cat" ? "cat-avatar" : "puffo-sprite";
     sprite.setAttribute("aria-hidden", "true");
     renderSprite(sprite, stateId, index);
 
@@ -149,7 +270,7 @@ function setState(stateId, options = {}) {
   const state = petStates[stateId] || petStates.idle;
   elements.petState.textContent = state.mood;
   elements.previewStateLabel.textContent = `${state.label} - ${state.frames} frames`;
-  elements.selectedStatePrompt.textContent = state.prompt;
+  elements.selectedStatePrompt.textContent = activePet.statePrompts[stateId] || state.prompt;
   renderFrameStrip(stateId);
 
   document.querySelectorAll("[data-state-choice]").forEach((button) => {
@@ -242,6 +363,7 @@ function loadImageFromFile(file) {
 
 function renderPhotoPreview(files) {
   const fragment = document.createDocumentFragment();
+  elements.photoPreview.classList.toggle("is-grid", files.length > 1);
   files.slice(0, 3).forEach((file) => {
     const image = document.createElement("img");
     image.src = URL.createObjectURL(file);
@@ -285,7 +407,7 @@ function buildTraits(photoCount) {
   const confidenceTrait =
     photoCount >= 3 ? "front face + body references" : "needs more angles for stronger markings";
 
-  return [...defaultTraits.slice(0, 6), confidenceTrait, ...ownerNotes];
+  return [...activePet.traits.slice(0, 6), confidenceTrait, ...ownerNotes];
 }
 
 function renderTraits() {
@@ -309,11 +431,11 @@ function markStep(activeStep) {
 }
 
 function buildPrompt() {
-  const name = clean(elements.petName.value) || "Puffo";
+  const name = clean(elements.petName.value) || activePet.name;
   return `Create a cute, movable companion-app pet from uploaded photos.
 
 Pet name: ${name}
-Species: dog
+Species: ${activePet.species}
 Breed and body: ${clean(elements.breed.value)}
 Weight and age notes: ${clean(elements.weight.value)}
 Reference photos: ${uploadedPhotoNames.join(", ")}
@@ -324,15 +446,15 @@ Owner correction:
 ${clean(elements.tweak.value)}
 
 Generation rules:
-- Preserve the same dog across every frame: white fluffy coat, cream floppy ears, dark button eyes, round black nose, soft muzzle, tiny paws, compact body.
+- Preserve the same ${activePet.species} across every frame: ${activePet.identityRule}.
 - Make the avatar recognizable and lovingly stylized, not photorealistic and not generic.
 - Generate visible frame differences for idle, walk, sleep, and annoyed states.
-- The pet should keep boundaries: if the owner interacts too much, Puffo can ask for quiet time.
+- The pet should keep boundaries: if the owner interacts too much, ${name} can ask for quiet time.
 - Export as a Petdex/OpenPets-compatible pet package when the owner approves the likeness.`;
 }
 
 function updateText() {
-  const name = clean(elements.petName.value) || "Puffo";
+  const name = clean(elements.petName.value) || activePet.name;
   const photoCount = uploadedPhotoNames.length;
 
   elements.homeTitle.textContent = `${name}'s Home`;
@@ -353,65 +475,118 @@ function updateText() {
   renderTraits();
 }
 
-function loadDefaultReferencePhoto() {
-  const image = new Image();
-  image.alt = "Puffo reference photo";
+function setActivePet(petId) {
+  activePetId = petProfiles[petId] ? petId : "dog";
+  activePet = petProfiles[activePetId];
+  uploadedPhotoNames = [...activePet.photoNames];
+  palette = [...activePet.palette];
+  traits = [...activePet.traits];
+  sleepHours = activePetId === "cat" ? 7.4 : 8;
+  interactionCount = 0;
+  frameClock = 0;
 
-  image.onload = () => {
-    elements.photoPreview.replaceChildren(image);
-    applyPalette(extractPalette(image));
-    updateText();
-  };
+  document.body.dataset.pet = activePetId;
+  elements.petName.value = activePet.name;
+  elements.breed.value = activePet.breed;
+  elements.weight.value = activePet.weight;
+  elements.tweak.value = activePet.tweak;
+  elements.visualSummary.textContent = activePet.visualSummary;
+  elements.generateButton.textContent = `Generate ${activePet.name} Preview`;
+  elements.petAvatar.setAttribute("aria-label", `Animated ${activePet.name}`);
+  elements.petPhoto.value = "";
 
-  image.onerror = () => {
-    elements.photoPreview.textContent = "Add Puffo.JPG";
-    uploadedPhotoNames = [];
-    updateText();
-  };
+  if (activePet.spritePath) {
+    document.documentElement.style.setProperty("--pet-sprite-url", `url("${activePet.spritePath}")`);
+  } else {
+    document.documentElement.style.removeProperty("--pet-sprite-url");
+  }
 
-  image.src = "./Puffo.JPG";
+  elements.petSwitches.forEach((button) => {
+    const isSelected = button.dataset.petSwitch === activePetId;
+    button.classList.toggle("is-selected", isSelected);
+  });
+
+  markStep("photo");
+  applyPalette(palette);
+  loadDefaultReferencePhotos();
+  setState("idle", { message: activePet.messages.initial });
+  updateText();
+}
+
+function loadDefaultReferencePhotos() {
+  const images = activePet.photoPaths.map((path, index) => {
+    const image = new Image();
+    image.alt = activePet.photoPaths.length > 1 ? `${activePet.photoAlt} ${index + 1}` : activePet.photoAlt;
+    image.src = path;
+    return image;
+  });
+
+  elements.photoPreview.classList.toggle("is-grid", images.length > 1);
+  elements.photoPreview.replaceChildren(...images);
+
+  const extracted = [];
+  let finished = 0;
+
+  images.forEach((image) => {
+    image.onload = () => {
+      extracted.push(...extractPalette(image));
+      finished += 1;
+      if (finished === images.length) {
+        applyPalette(extracted);
+        updateText();
+      }
+    };
+
+    image.onerror = () => {
+      finished += 1;
+      if (finished === images.length && !extracted.length) {
+        elements.photoPreview.textContent = `Add ${activePet.photoNames.join(", ")}`;
+        uploadedPhotoNames = [];
+        updateText();
+      }
+    };
+  });
 }
 
 function returnToIdle(delay = 1600) {
   clearTimeout(resetTimer);
   resetTimer = setTimeout(() => {
     if (currentState !== "waiting") {
-      setState("idle", { message: "I'll stay nearby." });
+      setState("idle", { message: activePet.messages.idle });
       updateText();
     }
   }, delay);
 }
 
 function interact(action) {
-  const name = clean(elements.petName.value) || "Puffo";
   interactionCount += action === "pet" ? 2 : 1;
 
   if (interactionCount >= 7 && action !== "sleep") {
-    setState("failed", { message: `${name} gives a tiny side-eye: a quiet minute, please.` });
+    setState("failed", { message: activePet.messages.annoyed });
     returnToIdle(2600);
     updateText();
     return;
   }
 
   if (action === "call") {
-    setState("running-right", { message: `${name} trots over, then decides how close is close enough.` });
+    setState("running-right", { message: activePet.messages.call });
     returnToIdle();
   }
 
   if (action === "play") {
-    setState("running-right", { message: "Short play session. No endless fetching today." });
+    setState("running-right", { message: activePet.messages.play });
     sleepHours = Math.max(0, sleepHours - 0.18);
     returnToIdle(1900);
   }
 
   if (action === "sleep") {
-    setState("waiting", { message: "I'll nap now. Wake me gently later." });
+    setState("waiting", { message: activePet.messages.sleep });
     sleepHours = Math.min(12, sleepHours + 0.8);
     interactionCount = Math.max(0, interactionCount - 3);
   }
 
   if (action === "pet") {
-    setState("idle", { message: interactionCount >= 4 ? "Behind the ears is okay. Not forever." : "That spot is okay." });
+    setState("idle", { message: interactionCount >= 4 ? activePet.messages.petCareful : activePet.messages.pet });
     returnToIdle(1400);
   }
 
@@ -421,7 +596,7 @@ function interact(action) {
 function generatePreview() {
   markStep("preview");
   traits = buildTraits(uploadedPhotoNames.length);
-  setState("review", { message: "Look closely. Does this still feel like Puffo?" });
+  setState("review", { message: activePet.messages.generate });
   updateText();
   returnToIdle(2400);
 }
@@ -434,7 +609,7 @@ function tickBioClock() {
   }
 
   if (sleepHours < 6.2 && currentState !== "waiting") {
-    setState("waiting", { message: "My clock says I need more sleep today." });
+    setState("waiting", { message: activePet.messages.sleepClock });
   }
 
   interactionCount = Math.max(0, interactionCount - 0.4);
@@ -443,6 +618,9 @@ function tickBioClock() {
 
 elements.petPhoto.addEventListener("change", handlePhotoUpload);
 elements.generateButton.addEventListener("click", generatePreview);
+elements.petSwitches.forEach((button) => {
+  button.addEventListener("click", () => setActivePet(button.dataset.petSwitch));
+});
 
 [elements.petName, elements.breed, elements.weight, elements.tweak].forEach((field) => {
   field.addEventListener("input", () => {
@@ -463,10 +641,6 @@ document.querySelectorAll("[data-state-choice]").forEach((button) => {
   });
 });
 
-applyPalette(palette);
-renderTraits();
-setState("idle");
-loadDefaultReferencePhoto();
-updateText();
+setActivePet("dog");
 setInterval(tickBioClock, 9000);
 requestAnimationFrame(animateSprites);
