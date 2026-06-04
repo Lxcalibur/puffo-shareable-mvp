@@ -11,10 +11,10 @@
       <section class="creator" aria-label="Create Puffo from photos">
         <div class="creator-copy">
           <p class="product-name">Pet's Afterlife</p>
-          <h1>Create a living version of a pet from photos.</h1>
+          <h1>Turn photos and memories into a pet that answers back.</h1>
           <p>
-            The first demo should prove one thing: a real photo can become a
-            recognizable, lovingly stylized pet who keeps his own rhythm.
+            Add photo → first look → add memory → pet responds. Keep feeding
+            stories, habits, and voice notes until it feels like them.
           </p>
         </div>
 
@@ -31,22 +31,29 @@
           <article class="flow-step is-active" data-step="photo">
             <span>01</span>
             <div>
-              <strong>Photo</strong>
-              <p>Reference photos, then more angles.</p>
+              <strong>Add photo</strong>
+              <p>Start with one clear face or body reference.</p>
             </div>
           </article>
-          <article class="flow-step" data-step="dna">
+          <article class="flow-step" data-step="first-look">
             <span>02</span>
             <div>
-              <strong>Visual DNA</strong>
-              <p>Confirm markings, shape, and expression.</p>
+              <strong>First look</strong>
+              <p>The app creates a recognizable soft avatar.</p>
             </div>
           </article>
-          <article class="flow-step" data-step="preview">
+          <article class="flow-step" data-step="memory">
             <span>03</span>
             <div>
-              <strong>Animated Preview</strong>
-              <p>Review motion before Home.</p>
+              <strong>Add memory</strong>
+              <p>Speak or type habits, stories, and boundaries.</p>
+            </div>
+          </article>
+          <article class="flow-step" data-step="respond">
+            <span>04</span>
+            <div>
+              <strong>Pet responds</strong>
+              <p>The pet reacts with personality, not obedience.</p>
             </div>
           </article>
         </section>
@@ -67,6 +74,14 @@
                 pose, and any special markings.
               </p>
             </div>
+          </section>
+
+          <section class="match-section" aria-label="Similar photo confirmation">
+            <div class="section-heading">
+              <span>Likely matches</span>
+              <strong id="matchSummary">Confirm the best references</strong>
+            </div>
+            <div class="match-grid" id="matchGrid"></div>
           </section>
 
           <section class="dna-section" aria-label="Puffo visual DNA">
@@ -106,8 +121,42 @@
             </label>
           </section>
 
+          <section class="memory-section" aria-label="Memory builder">
+            <div class="section-heading">
+              <span>Memory Builder</span>
+              <strong id="memorySummary">Add one habit or story</strong>
+            </div>
+            <div class="suggestion-grid">
+              <button type="button" data-memory-suggestion="appearance">
+                Appearance
+              </button>
+              <button type="button" data-memory-suggestion="behavior">
+                Behavior
+              </button>
+              <button type="button" data-memory-suggestion="habit">
+                Daily habit
+              </button>
+              <button type="button" data-memory-suggestion="story">
+                Story
+              </button>
+            </div>
+            <label>
+              <span>Tell the pet's memory</span>
+              <textarea
+                id="contextInput"
+                placeholder="Example: Puffo smelled his birthday cake before anyone called him. He is gentle, stubborn, and only comes close when he decides it is worth it."
+              ></textarea>
+            </label>
+            <div class="memory-actions">
+              <button id="voiceMemoryButton" type="button">Speak</button>
+              <button id="summarizeButton" type="button">Summarize into pet</button>
+              <span id="voiceStatus">Voice ready when supported.</span>
+            </div>
+            <div class="memory-capsules" id="memoryCapsules"></div>
+          </section>
+
           <button class="generate-button" id="generateButton" type="button">
-            Generate Puffo Preview
+            Generate first look
           </button>
         </form>
 
@@ -123,13 +172,45 @@
             <pre id="promptOutput"></pre>
           </details>
         </section>
+
+        <details class="state-panel motion-review" aria-label="Animation states">
+          <summary class="motion-summary">
+            <div class="section-heading">
+              <span>Maker tools</span>
+              <strong>Action Library</strong>
+            </div>
+            <em id="previewStateLabel">Idle - 6 frames</em>
+          </summary>
+
+          <div class="motion-review-body">
+            <div class="state-tabs" id="actionTabs"></div>
+
+            <div class="frame-strip" id="previewFrameStrip" aria-label="Current state frames"></div>
+            <div class="action-meta" id="actionMeta" aria-label="Action QA"></div>
+            <p id="selectedStatePrompt">
+              Neutral breathing loop with small visible frame differences.
+            </p>
+
+            <div class="command-card" aria-label="Command training">
+              <label>
+                <span>Cue</span>
+                <input id="commandInput" value="Puffo, come" />
+              </label>
+              <button id="trainCommand" type="button">Train</button>
+              <strong id="trainingLevel">Training 2 / 5</strong>
+            </div>
+          </div>
+        </details>
       </section>
 
       <section class="phone-wrap" aria-label="Puffo home preview">
         <div class="phone">
           <header class="phone-bar">
             <span>9:41</span>
-            <strong id="homeTitle">Puffo's Home</strong>
+            <div class="phone-title">
+              <strong id="homeTitle">Puffo</strong>
+              <small><i aria-hidden="true"></i><span id="homeMoodLabel">Happy</span></small>
+            </div>
             <span class="battery" aria-hidden="true"></span>
           </header>
 
@@ -164,43 +245,51 @@
             </div>
           </section>
 
+          <section class="home-prompt" aria-label="Talk to pet">
+            <div class="phone-upload-row">
+              <label class="phone-upload-button">
+                <input id="phonePetPhoto" type="file" accept="image/*" multiple />
+                Add photo
+              </label>
+              <span id="firstLookStatus">Add yours for a first look.</span>
+            </div>
+            <div class="prompt-row">
+              <input id="homePrompt" placeholder="Tell Puffo a memory..." />
+              <button id="homeVoiceButton" type="button" aria-label="Speak memory">Speak</button>
+              <button id="sendPrompt" type="button">Send</button>
+            </div>
+            <p id="intentSummary">AI understood: waiting for a photo or memory.</p>
+          </section>
+
           <nav class="actions" aria-label="Interactions">
             <button type="button" data-action="call">Call</button>
             <button type="button" data-action="play">Play</button>
             <button type="button" data-action="sleep">Nap</button>
             <button type="button" data-action="pet">Pet</button>
           </nav>
+
+          <section class="phone-flow" aria-label="Generation flow">
+            <div class="phone-step is-active" data-phone-step="photo">
+              <strong>1</strong>
+              <span>Add photo</span>
+            </div>
+            <div class="phone-step" data-phone-step="first-look" id="firstLookStep">
+              <strong>2</strong>
+              <span>First look</span>
+            </div>
+            <div class="phone-step" data-phone-step="memory" id="memoryStep">
+              <strong>3</strong>
+              <span>Add memory</span>
+            </div>
+            <div class="phone-step" data-phone-step="respond" id="reviewStep">
+              <strong>4</strong>
+              <span>Responds</span>
+            </div>
+          </section>
         </div>
-
-        <section class="state-panel" aria-label="Animation states">
-          <div class="section-heading">
-            <span>Animated Preview</span>
-            <strong id="previewStateLabel">Idle - 6 frames</strong>
-          </div>
-
-          <div class="state-tabs">
-            <button class="state-tab is-selected" type="button" data-state-choice="idle">
-              Idle
-            </button>
-            <button class="state-tab" type="button" data-state-choice="running-right">
-              Walk
-            </button>
-            <button class="state-tab" type="button" data-state-choice="waiting">
-              Sleep
-            </button>
-            <button class="state-tab" type="button" data-state-choice="failed">
-              Annoyed
-            </button>
-          </div>
-
-          <div class="frame-strip" id="previewFrameStrip" aria-label="Current state frames"></div>
-          <p id="selectedStatePrompt">
-            Neutral breathing loop with small visible frame differences.
-          </p>
-        </section>
       </section>
     </main>
 
-    <script src="./app.js?v=nutty-v2-markings"></script>
+    <script src="./app.js?v=home-first-upload-v5-response"></script>
   </body>
 </html>
